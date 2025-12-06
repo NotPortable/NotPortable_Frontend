@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotPortable - Ranking</title>
+    <style>
+        /* DungGeunMo 폰트 */
+        @font-face {
+            font-family: 'DungGeunMo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DungGeunMo', monospace;
+            background-color: teal;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Header - 랜딩 페이지와 동일 */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 8.33vh; /* 90/1080 */
+            background-color: #C0C0C0;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.30vw; /* 25/1920 */
+            color: #7f7f7f;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .header .ranking {
+            position: absolute;
+            left: 19.53vw; /* 375/1920 */
+            cursor: pointer;
+        }
+
+        .header .ranking:hover {
+            color: #333;
+        }
+
+        .header .mypage {
+            position: absolute;
+            left: 26.77vw; /* 514/1920 */
+            cursor: pointer;
+        }
+
+        .header .mypage:hover {
+            color: #333;
+        }
+
+        .header .login {
+            position: absolute;
+            left: 88.85vw; /* 1706/1920 */
+            cursor: pointer;
+        }
+
+        .header .login:hover {
+            color: #333;
+        }
+
+        /* Logo */
+        .logo {
+            position: absolute;
+            left: 1.51vw; /* 29/1920 */
+            top: -7.96vh; /* -86/1080 */
+            width: 13.54vw; /* 260/1920 */
+            height: 24.07vh; /* 260/1080 */
+            z-index: 1000;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Main Content */
+        .ranking-container {
+            position: absolute;
+            top: 8.33vh;
+            left: 0;
+            width: 100vw;
+            min-height: calc(100vh - 8.33vh);
+            padding: 5vh 10vw;
+            overflow-y: auto;
+        }
+
+        /* 게임 탭 */
+        .game-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 3vh;
+        }
+
+        .game-tab {
+            flex: 1;
+            padding: 2vh 0;
+            background-color: #C0C0C0;
+            border: 2px solid #808080;
+            border-bottom: none;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.2vw;
+            color: #000;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .game-tab:hover {
+            background-color: #d0d0d0;
+        }
+
+        .game-tab.active {
+            background-color: #e0e0e0;
+            border-bottom: 2px solid #e0e0e0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 상위 랭커 & 내 프로필 섹션 */
+        .top-section {
+            display: flex;
+            gap: 2vw;
+            margin-bottom: 3vh;
+        }
+
+        .top-player-card,
+        .my-profile-card {
+            background-color: #C0C0C0;
+            border: 3px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            padding: 2vh 2vw;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.5vw;
+            margin-bottom: 2vh;
+            text-align: center;
+            color: #000;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+        }
+
+        .player-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #000080;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .player-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .player-details {
+            flex: 1;
+        }
+
+        .player-name {
+            font-size: 1.8vw;
+            font-weight: bold;
+            margin-bottom: 1vh;
+            color: #000;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1vh 2vw;
+            font-size: 1vw;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #555;
+        }
+
+        .stat-value {
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* 순위 테이블 */
+        .ranking-table {
+            background-color: #C0C0C0;
+            border: 3px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            width: 100%;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 150px 150px;
+            padding: 1.5vh 2vw;
+            background-color: #808080;
+            color: white;
+            font-size: 1.2vw;
+            font-weight: bold;
+            border-bottom: 2px solid #000;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 150px 150px 150px;
+            padding: 1.5vh 2vw;
+            border-bottom: 1px solid #808080;
+            font-size: 1.1vw;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .table-row:hover {
+            background-color: #d0d0d0;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .username {
+            color: #000;
+        }
+
+        .score {
+            color: #000080;
+            font-weight: bold;
+        }
+
+        /* 게임별 컬럼 */
+        .game-content {
+            display: none;
+        }
+
+        .game-content.active {
+            display: block;
+        }
+
+        /* Neverball 전용 */
+        .neverball-header {
+            grid-template-columns: 80px 1fr 150px 150px 150px;
+        }
+
+        .neverball-row {
+            grid-template-columns: 80px 1fr 150px 150px 150px;
+        }
+
+        /* SuperTux 전용 */
+        .supertux-header {
+            grid-template-columns: 80px 1fr 120px 120px 120px 120px;
+        }
+
+        .supertux-row {
+            grid-template-columns: 80px 1fr 120px 120px 120px 120px;
+        }
+
+        /* ETR 전용 */
+        .etr-header {
+            grid-template-columns: 80px 1fr 150px 150px 150px;
+        }
+
+        .etr-row {
+            grid-template-columns: 80px 1fr 150px 150px 150px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .top-section {
+                flex-direction: column;
+            }
+
+            .table-header,
+            .table-row {
+                font-size: 1.5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <p class="ranking" onclick="location.href='ranking.html'">랭킹</p>
+        <p class="mypage" onclick="location.href='mypage.html'">마이 페이지</p>
+        <p class="login" onclick="location.href='login.html'">로그인</p>
+    </div>
+
+    <!-- Logo -->
+    <div class="logo" onclick="location.href='landing.html'" style="cursor: pointer;">
+        <img alt="NotPortable Logo" src="./NotPortable.png" />
+    </div>
+
+    <!-- Ranking Content -->
+    <div class="ranking-container">
+        <!-- 게임 탭 -->
+        <div class="game-tabs">
+            <div class="game-tab active" onclick="switchGame('neverball')">Neverball</div>
+            <div class="game-tab" onclick="switchGame('supertux')">SuperTux</div>
+            <div class="game-tab" onclick="switchGame('etr')">ETR</div>
+        </div>
+
+        <!-- Neverball 랭킹 -->
+        <div class="game-content active" id="neverball-content">
+            <!-- 상위 랭커 & 내 프로필 -->
+            <div class="top-section">
+                <!-- 상위 1위 카드 -->
+                <div class="top-player-card">
+                    <div class="card-title">🏆 상위 카드라인</div>
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23000080' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffff00'/></svg>" alt="Player">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">_m1n.xco</div>
+                            <div class="player-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">레벨</span>
+                                    <span class="stat-value">107</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">점수</span>
+                                    <span class="stat-value">10000</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시간</span>
+                                    <span class="stat-value">05:23</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">코인</span>
+                                    <span class="stat-value">187</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 내 프로필 카드 -->
+                <div class="my-profile-card">
+                    <div class="card-title">👤 내 프로필</div>
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23ff0000' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffffff'/></svg>" alt="Me">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">jeonggoo</div>
+                            <div class="player-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">레벨</span>
+                                    <span class="stat-value">107</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">점수</span>
+                                    <span class="stat-value">10000</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">날짜</span>
+                                    <span class="stat-value">18/3/27</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">코인</span>
+                                    <span class="stat-value">187</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 순위 테이블 -->
+            <div class="ranking-table">
+                <div class="table-header neverball-header">
+                    <div>순위</div>
+                    <div>순한시명</div>
+                    <div>점수</div>
+                    <div>시간</div>
+                    <div>코인</div>
+                </div>
+                <div class="table-row neverball-row">
+                    <div class="rank-number">1.</div>
+                    <div class="username">_m1n.xco</div>
+                    <div class="score">10000</div>
+                    <div>05:23</div>
+                    <div>187</div>
+                </div>
+                <div class="table-row neverball-row">
+                    <div class="rank-number">2.</div>
+                    <div class="username">syx.p_</div>
+                    <div class="score">9875</div>
+                    <div>05:45</div>
+                    <div>183</div>
+                </div>
+                <div class="table-row neverball-row">
+                    <div class="rank-number">3.</div>
+                    <div class="username">za3.y_</div>
+                    <div class="score">9253</div>
+                    <div>06:12</div>
+                    <div>99</div>
+                </div>
+                <div class="table-row neverball-row">
+                    <div class="rank-number">4.</div>
+                    <div class="username">eux_3</div>
+                    <div class="score">8753</div>
+                    <div>06:34</div>
+                    <div>92</div>
+                </div>
+                <div class="table-row neverball-row">
+                    <div class="rank-number">5.</div>
+                    <div class="username">j.nxcu</div>
+                    <div class="score">????</div>
+                    <div>07:01</div>
+                    <div>86</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SuperTux 랭킹 -->
+        <div class="game-content" id="supertux-content">
+            <div class="top-section">
+                <div class="top-player-card">
+                    <div class="card-title">🏆 상위 카드라인</div>
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23000080' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%2300ff00'/></svg>" alt="Player">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">penguin_king</div>
+                            <div class="player-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">레벨</span>
+                                    <span class="stat-value">world1-level5</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">코인</span>
+                                    <span class="stat-value">243</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시크릿</span>
+                                    <span class="stat-value">5</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시간</span>
+                                    <span class="stat-value">125.3s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-profile-card">
+                    <div class="card-title">👤 내 프로필</div>
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23ff0000' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffffff'/></svg>" alt="Me">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">jeonggoo</div>
+                            <div class="player-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">레벨</span>
+                                    <span class="stat-value">world1-level3</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">코인</span>
+                                    <span class="stat-value">156</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시크릿</span>
+                                    <span class="stat-value">2</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시간</span>
+                                    <span class="stat-value">142.8s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-table">
+                <div class="table-header supertux-header">
+                    <div>순위</div>
+                    <div>순한시명</div>
+                    <div>레벨</div>
+                    <div>코인</div>
+                    <div>시크릿</div>
+                    <div>시간</div>
+                </div>
+                <div class="table-row supertux-row">
+                    <div class="rank-number">1.</div>
+                    <div class="username">penguin_king</div>
+                    <div>world1-5</div>
+                    <div class="score">243</div>
+                    <div>5</div>
+                    <div>125.3s</div>
+                </div>
+                <div class="table-row supertux-row">
+                    <div class="rank-number">2.</div>
+                    <div class="username">ice_runner</div>
+                    <div>world1-4</div>
+                    <div class="score">198</div>
+                    <div>3</div>
+                    <div>134.7s</div>
+                </div>
+                <div class="table-row supertux-row">
+                    <div class="rank-number">3.</div>
+                    <div class="username">jeonggoo</div>
+                    <div>world1-3</div>
+                    <div class="score">156</div>
+                    <div>2</div>
+                    <div>142.8s</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETR 랭킹 -->
+        <div class="game-content" id="etr-content">
+            <div class="top-section">
+                <div class="top-player-card">
+                    <div class="card-title">🏆 상위 카드라인</div>
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23000080' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%2300ffff'/></svg>" alt="Player">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">speed_racer</div>
+                            <div class="player-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">코스</span>
+                                    <span class="stat-value">Mountain Peak</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">점수</span>
+                                    <span class="stat-value">15234</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">청어</span>
+                                    <span class="stat-value">45</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시간</span>
+                                    <span class="stat-value">01:23.45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-profile-card">
+                    <div class="card-title">👤 내 프로필</div>
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23ff0000' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffffff'/></svg>" alt="Me">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">jeonggoo</div>
+                            <div class="player-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">코스</span>
+                                    <span class="stat-value">Easy Run</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">점수</span>
+                                    <span class="stat-value">8562</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">청어</span>
+                                    <span class="stat-value">23</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">시간</span>
+                                    <span class="stat-value">02:15.32</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-table">
+                <div class="table-header etr-header">
+                    <div>순위</div>
+                    <div>순한시명</div>
+                    <div>코스</div>
+                    <div>점수</div>
+                    <div>시간</div>
+                </div>
+                <div class="table-row etr-row">
+                    <div class="rank-number">1.</div>
+                    <div class="username">speed_racer</div>
+                    <div>Mountain Peak</div>
+                    <div class="score">15234</div>
+                    <div>01:23.45</div>
+                </div>
+                <div class="table-row etr-row">
+                    <div class="rank-number">2.</div>
+                    <div class="username">tux_master</div>
+                    <div>Ice Valley</div>
+                    <div class="score">12987</div>
+                    <div>01:45.67</div>
+                </div>
+                <div class="table-row etr-row">
+                    <div class="rank-number">3.</div>
+                    <div class="username">jeonggoo</div>
+                    <div>Easy Run</div>
+                    <div class="score">8562</div>
+                    <div>02:15.32</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchGame(game) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.game-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 모든 콘텐츠 숨기기
+            document.querySelectorAll('.game-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+
+            // 선택된 콘텐츠 표시
+            document.getElementById(game + '-content').classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotPortable - Landing</title>
+    <style>
+        /* DungGeunMo 폰트 */
+        @font-face {
+            font-family: 'DungGeunMo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DungGeunMo', monospace;
+            background-color: teal;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .landing-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: teal;
+        }
+
+        /* Header - 1920x1080 기준 */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 8.33vh; /* 90/1080 */
+            background-color: #C0C0C0;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.30vw; /* 25/1920 */
+            color: #7f7f7f;
+            display: flex;
+            align-items: center;
+        }
+
+        .header .ranking {
+            position: absolute;
+            left: 19.53vw; /* 375/1920 */
+            cursor: pointer;
+        }
+
+        .header .ranking:hover {
+            color: #333;
+        }
+
+        .header .mypage {
+            position: absolute;
+            left: 26.77vw; /* 514/1920 */
+            cursor: pointer;
+        }
+
+        .header .mypage:hover {
+            color: #333;
+        }
+
+        .header .login {
+            position: absolute;
+            left: 88.85vw; /* 1706/1920 */
+            cursor: pointer;
+        }
+
+        .header .login:hover {
+            color: #333;
+        }
+
+        /* Logo */
+        .logo {
+            position: absolute;
+            left: 1.51vw; /* 29/1920 */
+            top: -7.96vh; /* -86/1080 */
+            width: 13.54vw; /* 260/1920 */
+            height: 24.07vh; /* 260/1080 */
+            z-index: 10;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Handheld Console Image */
+        .console-image {
+            position: absolute;
+            left: 40.99vw; /* 787/1920 */
+            top: 13.61vh; /* 147/1080 */
+            width: 17.97vw; /* 345/1920 */
+            height: 31.94vh; /* 345/1080 */
+        }
+
+        .console-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: absolute;
+            left: 18.75vw; /* 360/1920 */
+            top: 50vh; /* 540/1080 */
+            width: 62.5vw; /* 1200/1920 */
+            height: 9.26vh; /* 100/1080 */
+            background-color: #C0C0C0;
+            border-radius: 4.63vh; /* 50px */
+        }
+
+        .search-bar-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Titlebar Button */
+        .titlebar-button {
+            position: absolute;
+            left: 1.25vw; /* 15/1200 비율 조정 */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 13.33vw; /* 160/1200 */
+            height: 80%;
+            background-color: #000080;
+            border-radius: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1vw;
+        }
+
+        .file-icon-container {
+            position: relative;
+            width: 4vw;
+            height: 4vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: white;
+            border-radius: 0.3vw;
+        }
+
+        .file-icon-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: -26%;
+            right: 26%;
+            top: 0;
+        }
+
+        .file-icon-wrapper img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .file-icon-image {
+            position: absolute;
+            aspect-ratio: 250/282;
+            left: -2%;
+            right: 58%;
+            top: 1.76vh; /* 19/1080 */
+        }
+
+        .file-icon-image img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* Dropdown Button */
+        .dropdown-container {
+            position: relative;
+            width: 2vw;
+            height: 2vw;
+            background-color: #C0C0C0;
+            margin-left: 0.5vw;
+            cursor: pointer;
+        }
+
+        .dropdown-button:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 110%;
+            left: -8vw;
+            background-color: #C0C0C0;
+            border: 2px solid #808080;
+            border-radius: 0;
+            box-shadow: 2px 2px 0px #000000;
+            width: 12vw;
+            display: none;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.8vh 1vw;
+            cursor: pointer;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.2vw;
+            color: #000;
+            border-bottom: 1px solid #808080;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #000080;
+            color: white;
+        }
+
+        .dropdown-item.selected {
+            background-color: #000080;
+            color: white;
+        }
+
+        .dropdown-button {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            box-shadow: 
+                -1px -1px 0px 0px inset #000000,
+                1px 1px 0px 0px inset #c1c1c1,
+                -2px -2px 0px 0px inset #818181,
+                2px 2px 0px 0px inset #ffffff;
+            pointer-events: none;
+        }
+
+        .dropdown-arrow {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.63vw; /* 12/1920 */
+            height: 1.11vh; /* 12/1080 */
+        }
+
+        .dropdown-arrow img {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .union-icon {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.8vw;
+            height: 0.5vw;
+        }
+
+        .union-icon img {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Search Input */
+        .search-input {
+            position: absolute;
+            left: 18vw; /* 타이틀바 다음 */
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.4vw;
+            color: #555;
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 35vw;
+        }
+
+        .search-input::placeholder {
+            color: #7f7f7f;
+        }
+
+        /* Search Icon */
+        .search-icon {
+            position: absolute;
+            right: 2vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4vw;
+            height: 4vw;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-icon:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .search-icon img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .header {
+                font-size: 2vw;
+            }
+
+            .search-input {
+                font-size: 2.5vw;
+                width: 35vw;
+            }
+
+            .logo {
+                width: 20vw;
+                height: 20vh;
+            }
+
+            .console-image {
+                width: 25vw;
+                height: 35vh;
+                left: 37.5vw;
+            }
+
+            .search-bar {
+                width: 70vw;
+                left: 15vw;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                font-size: 3vw;
+            }
+
+            .header .ranking,
+            .header .mypage {
+                display: none;
+            }
+
+            .header .login {
+                left: auto;
+                right: 5vw;
+            }
+
+            .logo {
+                width: 25vw;
+                height: 25vh;
+            }
+
+            .console-image {
+                width: 40vw;
+                height: 40vh;
+                left: 30vw;
+            }
+
+            .search-bar {
+                width: 90vw;
+                left: 5vw;
+            }
+
+            .search-input {
+                font-size: 3.5vw;
+                width: 50vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <!-- Header -->
+        <div class="header">
+            <p class="ranking" onclick="location.href='ranking.html'">랭킹</p>
+            <p class="mypage" onclick="location.href='mypage.html'">마이 페이지</p>
+            <p class="login" onclick="location.href='login.html'">로그인</p>
+        </div>
+
+        <!-- Logo -->
+        <div class="logo" onclick="location.href='landing.html'" style="cursor: pointer;">
+            <img alt="NotPortable Logo" src="http://localhost:3845/assets/6947f9b1cbce48c55a66f4de0012eeb8e94db4d3.png" />
+        </div>
+
+        <!-- Handheld Console Image -->
+        <div class="console-image">
+            <img alt="Console" src="http://localhost:3845/assets/30e56502a9144be5cd86dd311356eacaa9b5399a.png" />
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <div class="search-bar-content">
+                <!-- Titlebar Button with File Icon -->
+                <div class="titlebar-button">
+                    <div class="file-icon-container">
+                        <img class="game-icon" id="game-icon" alt="Game Icon" src="" />
+                    </div>
+                    <div class="dropdown-container" onclick="toggleDropdown(event)">
+                        <div class="dropdown-button">
+                            <div class="dropdown-arrow">
+                                <img alt="" src="http://localhost:3845/assets/ae0e9ae60798a968dc89220d59547eb6051558f8.png" />
+                            </div>
+                        </div>
+                        <div class="union-icon">
+                            <img alt="" src="http://localhost:3845/assets/ae0e9ae60798a968dc89220d59547eb6051558f8.png" />
+                        </div>
+                        <!-- Dropdown Menu -->
+                        <div class="dropdown-menu" id="dropdown-menu">
+                            <div class="dropdown-item" onclick="selectGame('neverball', event)">Neverball</div>
+                            <div class="dropdown-item" onclick="selectGame('supertux', event)">SuperTux</div>
+                            <div class="dropdown-item" onclick="selectGame('etr', event)">ETR</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    placeholder="사용자 이름을 입력해주세요..."
+                    id="username-input"
+                />
+
+                <!-- Search Icon -->
+                <div class="search-icon" onclick="handleSearch()">
+                    <img alt="Search" src="http://localhost:3845/assets/ae0e9ae60798a968dc89220d59547eb6051558f8.png" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedGame = 'neverball'; // 기본 선택 게임
+
+        // 게임별 아이콘 (실제 이미지가 있으면 URL 변경)
+        const gameIcons = {
+            'neverball': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23e0e0e0"/><text x="50" y="50" font-size="12" text-anchor="middle" dy=".3em">Neverball</text></svg>',
+            'supertux': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23e0e0e0"/><text x="50" y="50" font-size="12" text-anchor="middle" dy=".3em">SuperTux</text></svg>',
+            'etr': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23e0e0e0"/><text x="50" y="50" font-size="12" text-anchor="middle" dy=".3em">ETR</text></svg>'
+        };
+
+        // 드롭다운 토글
+        function toggleDropdown(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.toggle('active');
+        }
+
+        // 게임 선택
+        function selectGame(game, event) {
+            event.stopPropagation();
+            selectedGame = game;
+            
+            // 아이콘 변경
+            document.getElementById('game-icon').src = gameIcons[game];
+            
+            // 선택된 항목 표시
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            // 드롭다운 닫기
+            document.getElementById('dropdown-menu').classList.remove('active');
+            
+            console.log('선택된 게임:', game);
+        }
+
+        // 검색 기능
+        function handleSearch() {
+            const username = document.getElementById('username-input').value;
+            if (username.trim()) {
+                alert(`게임: ${selectedGame}\n사용자: ${username}`);
+                // 다음 페이지로 이동
+                window.location.href = `ranking.html?game=${selectedGame}&user=${encodeURIComponent(username)}`;
+            } else {
+                alert('사용자 이름을 입력해주세요!');
+            }
+        }
+
+        // Enter 키로 검색
+        document.getElementById('username-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        // 드롭다운 외부 클릭시 닫기
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdown-menu');
+            if (menu.classList.contains('active')) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // 페이지 로드시 기본 게임 아이콘 설정
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('game-icon').src = gameIcons[selectedGame];
+            document.querySelector('.dropdown-item').classList.add('selected');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotPortable - My Page</title>
+    <style>
+        /* DungGeunMo 폰트 */
+        @font-face {
+            font-family: 'DungGeunMo';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DungGeunMo', monospace;
+            background-color: teal;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Header - 랜딩 페이지와 동일 */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 8.33vh; /* 90/1080 */
+            background-color: #C0C0C0;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.30vw; /* 25/1920 */
+            color: #7f7f7f;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .header .ranking {
+            position: absolute;
+            left: 19.53vw; /* 375/1920 */
+            cursor: pointer;
+        }
+
+        .header .ranking:hover {
+            color: #333;
+        }
+
+        .header .mypage {
+            position: absolute;
+            left: 26.77vw; /* 514/1920 */
+            cursor: pointer;
+        }
+
+        .header .mypage:hover {
+            color: #333;
+        }
+
+        .header .login {
+            position: absolute;
+            left: 88.85vw; /* 1706/1920 */
+            cursor: pointer;
+        }
+
+        .header .login:hover {
+            color: #333;
+        }
+
+        /* Logo */
+        .logo {
+            position: absolute;
+            left: 1.51vw; /* 29/1920 */
+            top: -7.96vh; /* -86/1080 */
+            width: 13.54vw; /* 260/1920 */
+            height: 24.07vh; /* 260/1080 */
+            z-index: 1000;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Main Content */
+        .mypage-container {
+            position: absolute;
+            top: 8.33vh;
+            left: 0;
+            width: 100vw;
+            min-height: calc(100vh - 8.33vh);
+            padding: 5vh 10vw;
+            overflow-y: auto;
+        }
+
+        /* 사용자 프로필 카드 */
+        .profile-card {
+            background-color: #C0C0C0;
+            border: 3px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            padding: 2vw;
+            margin-bottom: 3vh;
+            display: flex;
+            gap: 2vw;
+            align-items: center;
+        }
+
+        .profile-icon {
+            width: 120px;
+            height: 120px;
+            background-color: #000080;
+            border: 2px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-username {
+            font-size: 2vw;
+            font-weight: bold;
+            margin-bottom: 1vh;
+            color: #000;
+        }
+
+        .profile-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1vh 2vw;
+            margin-top: 2vh;
+        }
+
+        .profile-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5vh;
+        }
+
+        .stat-label {
+            font-size: 0.9vw;
+            color: #555;
+        }
+
+        .stat-value {
+            font-size: 1.2vw;
+            color: #000080;
+            font-weight: bold;
+        }
+
+        /* 게임 통계 탭 */
+        .game-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 0;
+        }
+
+        .game-tab {
+            flex: 1;
+            padding: 1.5vh 0;
+            background-color: #C0C0C0;
+            border: 2px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            border-bottom: none;
+            font-family: 'DungGeunMo', monospace;
+            font-size: 1.2vw;
+            color: #000;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .game-tab:hover {
+            background-color: #d0d0d0;
+        }
+
+        .game-tab.active {
+            background-color: #e0e0e0;
+            border-bottom: 2px solid #e0e0e0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 통계 컨텐츠 */
+        .stats-content {
+            background-color: #C0C0C0;
+            border: 3px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            padding: 2vw;
+            min-height: 40vh;
+        }
+
+        .game-stats {
+            display: none;
+        }
+
+        .game-stats.active {
+            display: block;
+        }
+
+        /* 통계 섹션 */
+        .stats-section {
+            margin-bottom: 3vh;
+        }
+
+        .stats-section-title {
+            font-size: 1.4vw;
+            color: #000;
+            margin-bottom: 2vh;
+            padding-bottom: 1vh;
+            border-bottom: 2px solid #808080;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2vh 2vw;
+        }
+
+        .stat-box {
+            background-color: #e0e0e0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 1.5vh 1vw;
+            text-align: center;
+        }
+
+        .stat-box-label {
+            font-size: 0.9vw;
+            color: #555;
+            margin-bottom: 1vh;
+        }
+
+        .stat-box-value {
+            font-size: 1.6vw;
+            color: #000080;
+            font-weight: bold;
+        }
+
+        /* 최근 플레이 기록 */
+        .recent-plays {
+            margin-top: 3vh;
+        }
+
+        .play-record {
+            background-color: #e0e0e0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 1vh 1.5vw;
+            margin-bottom: 1vh;
+            display: grid;
+            grid-template-columns: 150px 150px 1fr 120px;
+            gap: 2vw;
+            align-items: center;
+            font-size: 1vw;
+        }
+
+        .record-date {
+            color: #666;
+        }
+
+        .record-game {
+            color: #000;
+            font-weight: bold;
+        }
+
+        .record-result {
+            color: #555;
+        }
+
+        .record-score {
+            color: #000080;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        /* 업적 배지 */
+        .achievements {
+            margin-top: 3vh;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.5vh;
+        }
+
+        .achievement-badge {
+            background-color: #e0e0e0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 1vh;
+            text-align: center;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5vh;
+        }
+
+        .achievement-badge.unlocked {
+            background-color: #ffeb3b;
+            border-color: #ffc107 #ff9800 #ff9800 #ffc107;
+        }
+
+        .achievement-icon {
+            font-size: 2vw;
+        }
+
+        .achievement-name {
+            font-size: 0.7vw;
+            color: #333;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .achievement-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+            }
+
+            .profile-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .achievement-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <p class="ranking" onclick="location.href='ranking.html'">랭킹</p>
+        <p class="mypage" onclick="location.href='mypage.html'">마이 페이지</p>
+        <p class="login" onclick="location.href='login.html'">로그인</p>
+    </div>
+
+    <!-- Logo -->
+    <div class="logo" onclick="location.href='landing.html'" style="cursor: pointer;">
+        <img alt="NotPortable Logo" src="./NotPortable.png" />
+    </div>
+
+    <!-- My Page Content -->
+    <div class="mypage-container">
+        <!-- 프로필 카드 -->
+        <div class="profile-card">
+            <div class="profile-icon">
+                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect fill='%23ff0000' width='120' height='120'/><circle cx='60' cy='60' r='45' fill='%23ffffff'/></svg>" alt="Profile">
+            </div>
+            <div class="profile-info">
+                <div class="profile-username">jeonggoo</div>
+                <div class="profile-stats-grid">
+                    <div class="profile-stat">
+                        <span class="stat-label">가입일</span>
+                        <span class="stat-value">2025.11.15</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-label">총 플레이</span>
+                        <span class="stat-value">127회</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-label">플레이 시간</span>
+                        <span class="stat-value">42시간</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-label">최고 랭킹</span>
+                        <span class="stat-value">3위</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-label">업적</span>
+                        <span class="stat-value">8/15</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-label">마지막 접속</span>
+                        <span class="stat-value">2시간 전</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임별 통계 탭 -->
+        <div class="game-tabs">
+            <div class="game-tab active" onclick="switchGameStats('neverball')">Neverball</div>
+            <div class="game-tab" onclick="switchGameStats('supertux')">SuperTux</div>
+            <div class="game-tab" onclick="switchGameStats('etr')">ETR</div>
+        </div>
+
+        <div class="stats-content">
+            <!-- Neverball 통계 -->
+            <div class="game-stats active" id="neverball-stats">
+                <div class="stats-section">
+                    <div class="stats-section-title">📊 게임 통계</div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-label">최고 점수</div>
+                            <div class="stat-box-value">10000</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">총 플레이</div>
+                            <div class="stat-box-value">45회</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">평균 코인</div>
+                            <div class="stat-box-value">152</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">최단 시간</div>
+                            <div class="stat-box-value">05:23</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">현재 랭킹</div>
+                            <div class="stat-box-value">3위</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">총 코인</div>
+                            <div class="stat-box-value">6840</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">클리어 레벨</div>
+                            <div class="stat-box-value">107</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">승률</div>
+                            <div class="stat-box-value">78%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-plays">
+                    <div class="stats-section-title">🕒 최근 플레이 기록</div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.07 01:45</span>
+                        <span class="record-game">Neverball</span>
+                        <span class="record-result">레벨 107 클리어 • 코인 187개</span>
+                        <span class="record-score">10000점</span>
+                    </div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.06 23:12</span>
+                        <span class="record-game">Neverball</span>
+                        <span class="record-result">레벨 105 클리어 • 코인 165개</span>
+                        <span class="record-score">9650점</span>
+                    </div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.06 21:30</span>
+                        <span class="record-game">Neverball</span>
+                        <span class="record-result">레벨 103 클리어 • 코인 142개</span>
+                        <span class="record-score">9200점</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SuperTux 통계 -->
+            <div class="game-stats" id="supertux-stats">
+                <div class="stats-section">
+                    <div class="stats-section-title">📊 게임 통계</div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-label">클리어 레벨</div>
+                            <div class="stat-box-value">world1-3</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">총 플레이</div>
+                            <div class="stat-box-value">38회</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">총 코인</div>
+                            <div class="stat-box-value">5924</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">시크릿 발견</div>
+                            <div class="stat-box-value">12</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">현재 랭킹</div>
+                            <div class="stat-box-value">5위</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">최단 시간</div>
+                            <div class="stat-box-value">142.8s</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">적 처치</div>
+                            <div class="stat-box-value">234</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">완료율</div>
+                            <div class="stat-box-value">60%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-plays">
+                    <div class="stats-section-title">🕒 최근 플레이 기록</div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.06 20:15</span>
+                        <span class="record-game">SuperTux</span>
+                        <span class="record-result">world1-3 클리어 • 코인 156개</span>
+                        <span class="record-score">완료</span>
+                    </div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.05 18:40</span>
+                        <span class="record-game">SuperTux</span>
+                        <span class="record-result">world1-2 클리어 • 코인 132개</span>
+                        <span class="record-score">완료</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ETR 통계 -->
+            <div class="game-stats" id="etr-stats">
+                <div class="stats-section">
+                    <div class="stats-section-title">📊 게임 통계</div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-label">최고 점수</div>
+                            <div class="stat-box-value">8562</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">총 플레이</div>
+                            <div class="stat-box-value">44회</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">총 청어</div>
+                            <div class="stat-box-value">1012</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">최단 시간</div>
+                            <div class="stat-box-value">02:15.32</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">현재 랭킹</div>
+                            <div class="stat-box-value">7위</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">즐겨찾는 코스</div>
+                            <div class="stat-box-value">Easy Run</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">평균 점수</div>
+                            <div class="stat-box-value">6234</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">완주율</div>
+                            <div class="stat-box-value">85%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-plays">
+                    <div class="stats-section-title">🕒 최근 플레이 기록</div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.06 19:25</span>
+                        <span class="record-game">ETR</span>
+                        <span class="record-result">Easy Run • 청어 23개</span>
+                        <span class="record-score">8562점</span>
+                    </div>
+                    <div class="play-record">
+                        <span class="record-date">2025.12.05 22:50</span>
+                        <span class="record-game">ETR</span>
+                        <span class="record-result">Ice Valley • 청어 18개</span>
+                        <span class="record-score">7234점</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 업적 -->
+            <div class="achievements">
+                <div class="stats-section-title">🏆 업적</div>
+                <div class="achievement-grid">
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">🎮</div>
+                        <div class="achievement-name">첫 플레이</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">🔥</div>
+                        <div class="achievement-name">10회 플레이</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">⭐</div>
+                        <div class="achievement-name">100회 플레이</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">🥇</div>
+                        <div class="achievement-name">1위 달성</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">💯</div>
+                        <div class="achievement-name">만점 기록</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">🪙</div>
+                        <div class="achievement-name">코인 1000개</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">⚡</div>
+                        <div class="achievement-name">스피드런</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="achievement-icon">🎯</div>
+                        <div class="achievement-name">정확도 왕</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon">🏅</div>
+                        <div class="achievement-name">모든 레벨</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon">👑</div>
+                        <div class="achievement-name">그랜드마스터</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon">🌟</div>
+                        <div class="achievement-name">완벽주의</div>
+                    </div>
+                    <div class="achievement-badge">
+                        <div class="achievement-icon">💎</div>
+                        <div class="achievement-name">레전드</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchGameStats(game) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.game-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 모든 통계 숨기기
+            document.querySelectorAll('.game-stats').forEach(stats => {
+                stats.classList.remove('active');
+            });
+
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+
+            // 선택된 통계 표시
+            document.getElementById(game + '-stats').classList.add('active');
+        }
+    </script>
+</body>
+</html>
