@@ -326,9 +326,9 @@
     <div class="ranking-container">
         <!-- 게임 탭 -->
         <div class="game-tabs">
-            <div class="game-tab active" onclick="switchGame('neverball')">Neverball</div>
-            <div class="game-tab" onclick="switchGame('supertux')">SuperTux</div>
-            <div class="game-tab" onclick="switchGame('etr')">ETR</div>
+            <div class="game-tab active" data-game="neverball">Neverball</div>
+            <div class="game-tab" data-game="supertux">SuperTux</div>
+            <div class="game-tab" data-game="etr">ETR</div>
         </div>
 
         <!-- Neverball 랭킹 -->
@@ -338,7 +338,7 @@
                 <!-- 상위 1위 카드 -->
                 <div class="top-player-card">
                     <div class="card-title">🏆 상위 카드라인</div>
-                    <div id="top-player-info" style="padding: 2vh; text-align: center; color: #666;">
+                    <div id="neverball-top-player" style="padding: 2vh; text-align: center; color: #666;">
                         데이터 로딩 중...
                     </div>
                 </div>
@@ -346,7 +346,7 @@
                 <!-- 내 프로필 카드 -->
                 <div class="my-profile-card">
                     <div class="card-title">👤 내 프로필</div>
-                    <div id="my-profile-info" style="padding: 2vh; text-align: center; color: #666;">
+                    <div id="neverball-my-profile" style="padding: 2vh; text-align: center; color: #666;">
                         데이터 로딩 중...
                     </div>
                 </div>
@@ -356,7 +356,7 @@
             <div class="ranking-table">
                 <div class="table-header neverball-header">
                     <div>순위</div>
-                    <div>이름</div>
+                    <div>순한시명</div>
                     <div>점수</div>
                     <div>시간</div>
                     <div>코인</div>
@@ -372,14 +372,14 @@
             <div class="top-section">
                 <div class="top-player-card">
                     <div class="card-title">🏆 상위 카드라인</div>
-                    <div style="padding: 2vh; text-align: center; color: #666;">
+                    <div id="supertux-top-player" style="padding: 2vh; text-align: center; color: #666;">
                         데이터 로딩 중...
                     </div>
                 </div>
 
                 <div class="my-profile-card">
                     <div class="card-title">👤 내 프로필</div>
-                    <div style="padding: 2vh; text-align: center; color: #666;">
+                    <div id="supertux-my-profile" style="padding: 2vh; text-align: center; color: #666;">
                         데이터 로딩 중...
                     </div>
                 </div>
@@ -388,7 +388,7 @@
             <div class="ranking-table">
                 <div class="table-header supertux-header">
                     <div>순위</div>
-                    <div>이름</div>
+                    <div>순한시명</div>
                     <div>레벨</div>
                     <div>코인</div>
                     <div>시크릿</div>
@@ -405,14 +405,14 @@
             <div class="top-section">
                 <div class="top-player-card">
                     <div class="card-title">🏆 상위 카드라인</div>
-                    <div style="padding: 2vh; text-align: center; color: #666;">
+                    <div id="etr-top-player" style="padding: 2vh; text-align: center; color: #666;">
                         데이터 로딩 중...
                     </div>
                 </div>
 
                 <div class="my-profile-card">
                     <div class="card-title">👤 내 프로필</div>
-                    <div style="padding: 2vh; text-align: center; color: #666;">
+                    <div id="etr-my-profile" style="padding: 2vh; text-align: center; color: #666;">
                         데이터 로딩 중...
                     </div>
                 </div>
@@ -421,7 +421,7 @@
             <div class="ranking-table">
                 <div class="table-header etr-header">
                     <div>순위</div>
-                    <div>이름</div>
+                    <div>순한시명</div>
                     <div>코스</div>
                     <div>점수</div>
                     <div>시간</div>
@@ -435,6 +435,8 @@
 
     <script>
         function switchGame(game) {
+            console.log('🎮 게임 전환:', game);
+            
             // 모든 탭 비활성화
             document.querySelectorAll('.game-tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -446,15 +448,44 @@
             });
 
             // 선택된 탭 활성화
-            const tabs = document.querySelectorAll('.game-tab');
-            const gameIndex = {'neverball': 0, 'supertux': 1, 'etr': 2};
-            if (gameIndex[game] !== undefined) {
-                tabs[gameIndex[game]].classList.add('active');
+            const selectedTab = document.querySelector(`.game-tab[data-game="${game}"]`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
             }
 
             // 선택된 콘텐츠 표시
-            document.getElementById(game + '-content').classList.add('active');
+            const selectedContent = document.getElementById(game + '-content');
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+            
+            // 카드 초기화
+            const topPlayerCard = selectedContent.querySelector('.top-player-card > div:last-child');
+            const myProfileCard = selectedContent.querySelector('.my-profile-card > div:last-child');
+            
+            if (topPlayerCard) {
+                topPlayerCard.innerHTML = '<div style="padding: 2vh; text-align: center; color: #666;">데이터 로딩 중...</div>';
+            }
+            if (myProfileCard) {
+                myProfileCard.innerHTML = '<div style="padding: 2vh; text-align: center; color: #666;">데이터 로딩 중...</div>';
+            }
+            
+            // 해당 게임 랭킹 로드
+            loadGameRanking(game);
         }
+        
+        // 게임 탭 클릭 이벤트
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.game-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const game = this.getAttribute('data-game');
+                    switchGame(game);
+                });
+            });
+            
+            // 초기 로드
+            loadRankingData();
+        });
     </script>
     <script>
         // 공통 네비게이션 스크립트
@@ -481,19 +512,12 @@
     </script>
 
     <script>
-        const API_BASE_URL = "http://192.168.35.134:8000/api";
+        const API_BASE_URL = "http://10.150.3.57:8000/api";
         
-        // 페이지 로드시 랭킹 데이터 로드
-        async function loadRankingData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const game = urlParams.get('game') || 'neverball';
+        // 특정 게임 랭킹 로드
+        async function loadGameRanking(game) {
+            console.log('🏆 랭킹 로딩:', game);
             
-            console.log('🏆 랭킹 데이터 로딩...', { game });
-            
-            // 게임 탭 전환
-            switchGame(game);
-            
-            // 랭킹 데이터 로드
             try {
                 const response = await fetch(`${API_BASE_URL}/${game}/ranking?limit=10`);
                 if (response.ok) {
@@ -512,6 +536,17 @@
             }
         }
         
+        // 페이지 로드시 랭킹 데이터 로드
+        async function loadRankingData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const game = urlParams.get('game') || 'neverball';
+            
+            console.log('🏆 초기 랭킹 데이터 로딩...', { game });
+            
+            // 게임 탭 전환
+            switchGame(game);
+        }
+        
         function updateRankingTable(game, rankings) {
             const bodyId = game + '-ranking-body';
             const bodyElement = document.getElementById(bodyId);
@@ -521,41 +556,197 @@
                 return;
             }
             
+            // 상위 1위 플레이어 카드 업데이트
+            if (rankings.length > 0) {
+                const topPlayer = rankings[0];
+                updateTopPlayerCard(game, topPlayer);
+            }
+            
+            // 로그인한 사용자 프로필 카드 업데이트
+            const username = localStorage.getItem('notportable_username');
+            if (username) {
+                loadUserProfile(game, username);
+            }
+            
             let rowsHTML = '';
             rankings.forEach(rank => {
                 const rowClass = game + '-row';
+                // 이상 데이터 표시 - 빨간 X 아이콘
+                const anomalyIcon = rank.is_anomaly 
+                    ? '<span style="color: #ff0000; font-weight: bold; font-size: 1.8em; margin-left: 0.5vw; vertical-align: middle;" title="이상 데이터 감지!">✖</span>' 
+                    : '';
+                
                 if (game === 'neverball') {
                     rowsHTML += `
-                        <div class="table-row ${rowClass}">
+                        <div class="table-row ${rowClass}" style="${rank.is_anomaly ? 'background-color: #ffe6e6;' : ''}">
                             <div class="rank-number">${rank.rank}.</div>
                             <div class="username">${rank.username}</div>
                             <div class="score">${rank.score}</div>
                             <div>${rank.time}</div>
-                            <div>${rank.coins}</div>
+                            <div style="display: flex; align-items: center;">${rank.coins}${anomalyIcon}</div>
                         </div>`;
                 } else if (game === 'supertux') {
                     rowsHTML += `
-                        <div class="table-row ${rowClass}">
+                        <div class="table-row ${rowClass}" style="${rank.is_anomaly ? 'background-color: #ffe6e6;' : ''}">
                             <div class="rank-number">${rank.rank}.</div>
                             <div class="username">${rank.username}</div>
                             <div>${rank.level}</div>
                             <div class="score">${rank.coins}</div>
                             <div>${rank.secrets}</div>
-                            <div>${rank.time}</div>
+                            <div style="display: flex; align-items: center;">${rank.time}${anomalyIcon}</div>
                         </div>`;
                 } else if (game === 'etr') {
                     rowsHTML += `
-                        <div class="table-row ${rowClass}">
+                        <div class="table-row ${rowClass}" style="${rank.is_anomaly ? 'background-color: #ffe6e6;' : ''}">
                             <div class="rank-number">${rank.rank}.</div>
                             <div class="username">${rank.username}</div>
                             <div>${rank.course}</div>
                             <div class="score">${rank.score}</div>
-                            <div>${rank.time}</div>
+                            <div style="display: flex; align-items: center;">${rank.time}${anomalyIcon}</div>
                         </div>`;
                 }
             });
             
             bodyElement.innerHTML = rowsHTML;
+        }
+        
+        // 상위 플레이어 카드 업데이트
+        function updateTopPlayerCard(game, player) {
+            const topPlayerInfo = document.getElementById(`${game}-top-player`);
+            
+            if (!topPlayerInfo) {
+                console.error('❌ 카드 요소를 찾을 수 없음:', `${game}-top-player`);
+                return;
+            }
+            
+            let statsHTML = '';
+            if (game === 'neverball') {
+                statsHTML = `
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23000080' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffff00'/></svg>" alt="Player">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">${player.username}</div>
+                            <div class="player-stats">
+                                <div class="stat-item"><span class="stat-label">점수</span><span class="stat-value">${player.score}</span></div>
+                                <div class="stat-item"><span class="stat-label">레벨</span><span class="stat-value">${player.level}</span></div>
+                                <div class="stat-item"><span class="stat-label">시간</span><span class="stat-value">${player.time}</span></div>
+                                <div class="stat-item"><span class="stat-label">코인</span><span class="stat-value">${player.coins}</span></div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (game === 'supertux') {
+                statsHTML = `
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23000080' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%2300ff00'/></svg>" alt="Player">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">${player.username}</div>
+                            <div class="player-stats">
+                                <div class="stat-item"><span class="stat-label">레벨</span><span class="stat-value">${player.level}</span></div>
+                                <div class="stat-item"><span class="stat-label">코인</span><span class="stat-value">${player.coins}</span></div>
+                                <div class="stat-item"><span class="stat-label">시크릿</span><span class="stat-value">${player.secrets}</span></div>
+                                <div class="stat-item"><span class="stat-label">시간</span><span class="stat-value">${player.time}s</span></div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (game === 'etr') {
+                statsHTML = `
+                    <div class="player-info">
+                        <div class="player-icon">
+                            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23000080' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%2300ffff'/></svg>" alt="Player">
+                        </div>
+                        <div class="player-details">
+                            <div class="player-name">${player.username}</div>
+                            <div class="player-stats">
+                                <div class="stat-item"><span class="stat-label">코스</span><span class="stat-value">${player.course}</span></div>
+                                <div class="stat-item"><span class="stat-label">점수</span><span class="stat-value">${player.score}</span></div>
+                                <div class="stat-item"><span class="stat-label">청어</span><span class="stat-value">${player.herring}</span></div>
+                                <div class="stat-item"><span class="stat-label">시간</span><span class="stat-value">${player.time}</span></div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            
+            topPlayerInfo.innerHTML = statsHTML;
+            console.log('✅ 상위 플레이어 카드 업데이트:', game, player.username);
+        }
+        
+        // 사용자 프로필 로드
+        async function loadUserProfile(game, username) {
+            const myProfileInfo = document.getElementById(`${game}-my-profile`);
+            
+            if (!myProfileInfo) {
+                console.error('❌ 프로필 요소를 찾을 수 없음:', `${game}-my-profile`);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/${game}/user/${username}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    let statsHTML = '';
+                    if (game === 'neverball') {
+                        statsHTML = `
+                            <div class="player-info">
+                                <div class="player-icon">
+                                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23ff0000' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffffff'/></svg>" alt="Me">
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name">${username}</div>
+                                    <div class="player-stats">
+                                        <div class="stat-item"><span class="stat-label">총 플레이</span><span class="stat-value">${data.stats.total_plays}회</span></div>
+                                        <div class="stat-item"><span class="stat-label">최고 점수</span><span class="stat-value">${data.stats.max_score}</span></div>
+                                        <div class="stat-item"><span class="stat-label">평균 코인</span><span class="stat-value">${data.stats.avg_coins}</span></div>
+                                        <div class="stat-item"><span class="stat-label">최고 레벨</span><span class="stat-value">${data.stats.max_level}</span></div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    } else if (game === 'supertux') {
+                        statsHTML = `
+                            <div class="player-info">
+                                <div class="player-icon">
+                                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23ff0000' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffffff'/></svg>" alt="Me">
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name">${username}</div>
+                                    <div class="player-stats">
+                                        <div class="stat-item"><span class="stat-label">총 플레이</span><span class="stat-value">${data.stats.total_plays}회</span></div>
+                                        <div class="stat-item"><span class="stat-label">총 코인</span><span class="stat-value">${data.stats.total_coins}</span></div>
+                                        <div class="stat-item"><span class="stat-label">시크릿</span><span class="stat-value">${data.stats.total_secrets}</span></div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    } else if (game === 'etr') {
+                        statsHTML = `
+                            <div class="player-info">
+                                <div class="player-icon">
+                                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect fill='%23ff0000' width='80' height='80'/><circle cx='40' cy='40' r='30' fill='%23ffffff'/></svg>" alt="Me">
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name">${username}</div>
+                                    <div class="player-stats">
+                                        <div class="stat-item"><span class="stat-label">총 플레이</span><span class="stat-value">${data.stats.total_plays}회</span></div>
+                                        <div class="stat-item"><span class="stat-label">최고 점수</span><span class="stat-value">${data.stats.max_score}</span></div>
+                                        <div class="stat-item"><span class="stat-label">총 청어</span><span class="stat-value">${data.stats.total_herring}</span></div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                    
+                    myProfileInfo.innerHTML = statsHTML;
+                    console.log('✅ 내 프로필 업데이트:', game, username);
+                } else {
+                    myProfileInfo.innerHTML = '<div style="padding: 2vh; text-align: center; color: #666;">플레이 기록이 없습니다</div>';
+                    console.log('⚠️  플레이 기록 없음:', game, username);
+                }
+            } catch (error) {
+                console.error('❌ 프로필 로드 실패:', error);
+                myProfileInfo.innerHTML = '<div style="padding: 2vh; text-align: center; color: #999;">데이터를 불러올 수 없습니다</div>';
+            }
         }
         
         window.addEventListener('DOMContentLoaded', loadRankingData);
