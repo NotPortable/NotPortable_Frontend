@@ -379,34 +379,14 @@
         <!-- 프로필 카드 -->
         <div class="profile-card">
             <div class="profile-icon">
-                <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect fill='%23ff0000' width='120' height='120'/><circle cx='60' cy='60' r='45' fill='%23ffffff'/></svg>" alt="Profile">
+                <img id="profile-image" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect fill='%23ff0000' width='120' height='120'/><circle cx='60' cy='60' r='45' fill='%23ffffff'/></svg>" alt="Profile">
             </div>
             <div class="profile-info">
-                <div class="profile-username">jeonggoo</div>
-                <div class="profile-stats-grid">
+                <div class="profile-username" id="profile-username">Loading...</div>
+                <div class="profile-stats-grid" id="profile-stats">
                     <div class="profile-stat">
-                        <span class="stat-label">가입일</span>
-                        <span class="stat-value">2025.11.15</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="stat-label">총 플레이</span>
-                        <span class="stat-value">127회</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="stat-label">플레이 시간</span>
-                        <span class="stat-value">42시간</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="stat-label">최고 랭킹</span>
-                        <span class="stat-value">3위</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="stat-label">업적</span>
-                        <span class="stat-value">8/15</span>
-                    </div>
-                    <div class="profile-stat">
-                        <span class="stat-label">마지막 접속</span>
-                        <span class="stat-value">2시간 전</span>
+                        <span class="stat-label">데이터 로딩 중...</span>
+                        <span class="stat-value">-</span>
                     </div>
                 </div>
             </div>
@@ -655,6 +635,233 @@
     </div>
 
     <script>
+        const API_BASE_URL = "http://192.168.35.134:8000/api";
+
+        // 페이지 로드시 사용자 데이터 가져오기
+        async function loadUserData() {
+            // 로그인 체크
+            const USERNAME = localStorage.getItem('notportable_username');
+            if (!USERNAME) {
+                alert('로그인이 필요합니다!');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 프로필 이름 표시
+            document.getElementById('profile-username').textContent = USERNAME;
+            
+            console.log(`🔍 ${USERNAME} 데이터 로딩 중...`);
+            
+            let availableGames = [];
+            let totalPlays = 0;
+            
+            // Neverball 데이터 확인
+            try {
+                const neverballResponse = await fetch(`${API_BASE_URL}/neverball/user/${USERNAME}`);
+                if (neverballResponse.ok) {
+                    const data = await neverballResponse.json();
+                    availableGames.push('neverball');
+                    totalPlays += data.stats.total_plays;
+                    updateNeverballUI(data);
+                    console.log('✅ Neverball 데이터 로드 완료');
+                }
+            } catch (error) {
+                console.log('❌ Neverball 데이터 없음');
+                hideGameTab('neverball');
+            }
+            
+            // SuperTux 데이터 확인
+            try {
+                const supertuxResponse = await fetch(`${API_BASE_URL}/supertux/user/${USERNAME}`);
+                if (supertuxResponse.ok) {
+                    const data = await supertuxResponse.json();
+                    availableGames.push('supertux');
+                    totalPlays += data.stats.total_plays;
+                    updateSuperTuxUI(data);
+                    console.log('✅ SuperTux 데이터 로드 완료');
+                }
+            } catch (error) {
+                console.log('❌ SuperTux 데이터 없음');
+                hideGameTab('supertux');
+            }
+            
+            // ETR 데이터 확인
+            try {
+                const etrResponse = await fetch(`${API_BASE_URL}/etr/user/${USERNAME}`);
+                if (etrResponse.ok) {
+                    const data = await etrResponse.json();
+                    availableGames.push('etr');
+                    totalPlays += data.stats.total_plays;
+                    updateETRUI(data);
+                    console.log('✅ ETR 데이터 로드 완료');
+                }
+            } catch (error) {
+                console.log('❌ ETR 데이터 없음');
+                hideGameTab('etr');
+            }
+            
+            // 플레이한 게임이 없는 경우
+            if (availableGames.length === 0) {
+                showNoDataMessage();
+                updateProfileStats(0, 0);
+                return;
+            }
+            
+            // 프로필 통계 업데이트
+            updateProfileStats(totalPlays, availableGames.length);
+            
+            // 첫 번째 활성화된 게임 탭 표시
+            switchGameStats(availableGames[0]);
+            
+            console.log(`📊 총 ${availableGames.length}개 게임 플레이 기록 발견`);
+        }
+        
+        // 프로필 통계 업데이트
+        function updateProfileStats(totalPlays, totalGames) {
+            const statsHTML = `
+                <div class="profile-stat">
+                    <span class="stat-label">총 플레이</span>
+                    <span class="stat-value">${totalPlays}회</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">플레이 게임</span>
+                    <span class="stat-value">${totalGames}개</span>
+                </div>
+            `;
+            document.getElementById('profile-stats').innerHTML = statsHTML;
+        }
+
+        // 게임 탭 숨기기
+        function hideGameTab(game) {
+            const tabMap = {
+                'neverball': 0,
+                'supertux': 1,
+                'etr': 2
+            };
+            
+            const tabs = document.querySelectorAll('.game-tab');
+            const contents = document.querySelectorAll('.game-stats');
+            
+            if (tabs[tabMap[game]]) {
+                tabs[tabMap[game]].style.display = 'none';
+            }
+            if (contents[tabMap[game]]) {
+                contents[tabMap[game]].style.display = 'none';
+            }
+        }
+
+        // 데이터 없음 메시지 표시
+        function showNoDataMessage() {
+            document.querySelector('.stats-content').innerHTML = `
+                <div style="text-align: center; padding: 5vh;">
+                    <h2 style="color: #666; font-size: 2vw;">😢 플레이 기록이 없습니다</h2>
+                    <p style="color: #999; margin-top: 2vh; font-size: 1.2vw;">게임을 플레이하면 여기에 기록이 표시됩니다!</p>
+                </div>
+            `;
+        }
+
+        // Neverball UI 업데이트
+        function updateNeverballUI(data) {
+            document.querySelector('#neverball-stats .stats-grid').innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-box-label">최고 점수</div>
+                    <div class="stat-box-value">${data.stats.max_score}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">총 플레이</div>
+                    <div class="stat-box-value">${data.stats.total_plays}회</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">평균 코인</div>
+                    <div class="stat-box-value">${data.stats.avg_coins}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">최고 레벨</div>
+                    <div class="stat-box-value">${data.stats.max_level}</div>
+                </div>
+            `;
+            
+            // 최근 플레이 기록
+            const recentPlaysHTML = data.recent_logs.map(log => `
+                <div class="play-record">
+                    <span class="record-date">${new Date(log.created_at).toLocaleString('ko-KR')}</span>
+                    <span class="record-game">Neverball</span>
+                    <span class="record-result">레벨 ${log.level} • 코인 ${log.coins}개 ${log.is_anomaly ? '⚠️' : ''}</span>
+                    <span class="record-score">${log.score}점</span>
+                </div>
+            `).join('');
+            
+            document.querySelector('#neverball-stats .recent-plays').innerHTML = `
+                <div class="stats-section-title">🕒 최근 플레이 기록</div>
+                ${recentPlaysHTML}
+            `;
+        }
+
+        // SuperTux UI 업데이트
+        function updateSuperTuxUI(data) {
+            document.querySelector('#supertux-stats .stats-grid').innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-box-label">총 플레이</div>
+                    <div class="stat-box-value">${data.stats.total_plays}회</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">총 코인</div>
+                    <div class="stat-box-value">${data.stats.total_coins}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">시크릿 발견</div>
+                    <div class="stat-box-value">${data.stats.total_secrets}</div>
+                </div>
+            `;
+            
+            const recentPlaysHTML = data.recent_logs.map(log => `
+                <div class="play-record">
+                    <span class="record-date">${new Date(log.created_at).toLocaleString('ko-KR')}</span>
+                    <span class="record-game">SuperTux</span>
+                    <span class="record-result">${log.level} • 코인 ${log.coins}개 ${log.is_anomaly ? '⚠️' : ''}</span>
+                    <span class="record-score">완료</span>
+                </div>
+            `).join('');
+            
+            document.querySelector('#supertux-stats .recent-plays').innerHTML = `
+                <div class="stats-section-title">🕒 최근 플레이 기록</div>
+                ${recentPlaysHTML}
+            `;
+        }
+
+        // ETR UI 업데이트
+        function updateETRUI(data) {
+            document.querySelector('#etr-stats .stats-grid').innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-box-label">최고 점수</div>
+                    <div class="stat-box-value">${data.stats.max_score}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">총 플레이</div>
+                    <div class="stat-box-value">${data.stats.total_plays}회</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">총 청어</div>
+                    <div class="stat-box-value">${data.stats.total_herring}</div>
+                </div>
+            `;
+            
+            const recentPlaysHTML = data.recent_logs.map(log => `
+                <div class="play-record">
+                    <span class="record-date">${new Date(log.created_at).toLocaleString('ko-KR')}</span>
+                    <span class="record-game">ETR</span>
+                    <span class="record-result">${log.course} • 청어 ${log.herring}개 ${log.is_anomaly ? '⚠️' : ''}</span>
+                    <span class="record-score">${log.score}점</span>
+                </div>
+            `).join('');
+            
+            document.querySelector('#etr-stats .recent-plays').innerHTML = `
+                <div class="stats-section-title">🕒 최근 플레이 기록</div>
+                ${recentPlaysHTML}
+            `;
+        }
+
+        // 게임 탭 전환
         function switchGameStats(game) {
             // 모든 탭 비활성화
             document.querySelectorAll('.game-tab').forEach(tab => {
@@ -667,11 +874,48 @@
             });
 
             // 선택된 탭 활성화
-            event.target.classList.add('active');
-
-            // 선택된 통계 표시
-            document.getElementById(game + '-stats').classList.add('active');
+            const gameIndex = {
+                'neverball': 0,
+                'supertux': 1,
+                'etr': 2
+            };
+            
+            const tabs = document.querySelectorAll('.game-tab');
+            const contents = document.querySelectorAll('.game-stats');
+            
+            if (tabs[gameIndex[game]]) {
+                tabs[gameIndex[game]].classList.add('active');
+            }
+            if (contents[gameIndex[game]]) {
+                contents[gameIndex[game]].classList.add('active');
+            }
         }
+
+        // 페이지 로드시 데이터 불러오기
+        window.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+    <script>
+        // 공통 네비게이션 스크립트
+        function updateNavBar() {
+            const username = localStorage.getItem('notportable_username');
+            const loginElement = document.querySelector('.header .login');
+            
+            if (username && loginElement) {
+                loginElement.textContent = username;
+                loginElement.onclick = logout;
+                loginElement.style.color = '#000';
+                loginElement.title = '클릭하여 로그아웃';
+            }
+        }
+
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                localStorage.removeItem('notportable_username');
+                window.location.href = 'login.html';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', updateNavBar);
     </script>
 </body>
 </html>

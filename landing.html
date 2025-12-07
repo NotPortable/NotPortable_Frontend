@@ -414,12 +414,12 @@
 
         <!-- Logo -->
         <div class="logo" onclick="location.href='landing.html'" style="cursor: pointer;">
-            <img alt="NotPortable Logo" src="http://localhost:3845/assets/6947f9b1cbce48c55a66f4de0012eeb8e94db4d3.png" />
+            <img alt="NotPortable Logo" src="./NotPortable.png" />
         </div>
 
         <!-- Handheld Console Image -->
         <div class="console-image">
-            <img alt="Console" src="http://localhost:3845/assets/30e56502a9144be5cd86dd311356eacaa9b5399a.png" />
+            <img alt="Console" src="./NotPortable_.png" />
         </div>
 
         <!-- Search Bar -->
@@ -533,6 +533,29 @@
             document.getElementById('game-icon').src = gameIcons[selectedGame];
             document.querySelector('.dropdown-item').classList.add('selected');
         });
+    </script>
+    <script>
+        // 공통 네비게이션 스크립트
+        function updateNavBar() {
+            const username = localStorage.getItem('notportable_username');
+            const loginElement = document.querySelector('.header .login');
+            
+            if (username && loginElement) {
+                loginElement.textContent = username;
+                loginElement.onclick = logout;
+                loginElement.style.color = '#000';
+                loginElement.title = '클릭하여 로그아웃';
+            }
+        }
+
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                localStorage.removeItem('notportable_username');
+                window.location.href = 'login.html';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', updateNavBar);
     </script>
 </body>
 </html>
