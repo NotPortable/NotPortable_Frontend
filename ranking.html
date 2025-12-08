@@ -271,11 +271,35 @@
 
         /* Neverball 전용 */
         .neverball-header {
-            grid-template-columns: 80px 1fr 150px 150px 150px;
+            grid-template-columns: 80px 1fr 150px 150px 150px 100px;
         }
 
         .neverball-row {
-            grid-template-columns: 80px 1fr 150px 150px 150px;
+            grid-template-columns: 80px 1fr 150px 150px 150px 100px;
+        }
+        
+        /* 리플레이 버튼 */
+        .replay-btn {
+            padding: 0.3vh 0.8vw;
+            background-color: #000080;
+            color: white;
+            border: 2px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            font-family: 'DungGeunMo', monospace;
+            cursor: pointer;
+            font-size: 1.2em;
+            line-height: 1;
+            transition: all 0.1s;
+        }
+
+        .replay-btn:hover {
+            background-color: #0000cd;
+            transform: scale(1.1);
+        }
+
+        .replay-btn:active {
+            border-color: #000000 #ffffff #ffffff #000000;
+            padding: 0.4vh 0.7vw 0.2vh 0.9vw;
         }
 
         /* SuperTux 전용 */
@@ -360,6 +384,7 @@
                     <div>점수</div>
                     <div>시간</div>
                     <div>코인</div>
+                    <div>리플레이</div>
                 </div>
                 <div id="neverball-ranking-body" style="padding: 2vh; text-align: center; color: #666;">
                     데이터 로딩 중...
@@ -540,11 +565,18 @@
         async function loadRankingData() {
             const urlParams = new URLSearchParams(window.location.search);
             const game = urlParams.get('game') || 'neverball';
+            const searchUser = urlParams.get('user');  // URL에서 사용자명 가져오기
             
-            console.log('🏆 초기 랭킹 데이터 로딩...', { game });
+            console.log('🏆 초기 랭킹 데이터 로딩...', { game, searchUser });
             
             // 게임 탭 전환
             switchGame(game);
+            
+            // URL에 사용자명이 있으면 해당 사용자 하이라이트
+            if (searchUser) {
+                console.log(`🔍 사용자 검색: ${searchUser}`);
+                highlightUser = searchUser;
+            }
         }
         
         function updateRankingTable(game, rankings) {
@@ -577,6 +609,10 @@
                     : '';
                 
                 if (game === 'neverball') {
+                    const replayButton = rank.replay_filename 
+                        ? `<button class="replay-btn" onclick="downloadReplay('${rank.replay_filename}')" title="리플레이 다운로드">📹</button>` 
+                        : '<span style="color: #999;">-</span>';
+                    
                     rowsHTML += `
                         <div class="table-row ${rowClass}" style="${rank.is_anomaly ? 'background-color: #ffe6e6;' : ''}">
                             <div class="rank-number">${rank.rank}.</div>
@@ -584,6 +620,7 @@
                             <div class="score">${rank.score}</div>
                             <div>${rank.time}</div>
                             <div style="display: flex; align-items: center;">${rank.coins}${anomalyIcon}</div>
+                            <div style="text-align: center;">${replayButton}</div>
                         </div>`;
                 } else if (game === 'supertux') {
                     rowsHTML += `
@@ -746,6 +783,26 @@
             } catch (error) {
                 console.error('❌ 프로필 로드 실패:', error);
                 myProfileInfo.innerHTML = '<div style="padding: 2vh; text-align: center; color: #999;">데이터를 불러올 수 없습니다</div>';
+            }
+        }
+        
+        // 리플레이 다운로드
+        function downloadReplay(filename) {
+            console.log('🎬 리플레이 다운로드:', filename);
+            const url = `http://10.150.3.57:8000/api/neverball/replay/${filename}`;
+            window.open(url, '_blank');
+        }
+        
+        // 리플레이 정보 보기 (스트리밍 정보)
+        async function viewReplayInfo(filename) {
+            try {
+                const response = await fetch(`http://10.150.3.57:8000/api/neverball/replay/stream/${filename}`);
+                if (response.ok) {
+                    const info = await response.json();
+                    alert(`🎬 리플레이 정보\n\n플레이어: ${info.player}\n날짜: ${info.date}\n맵: ${info.map}\n크기: ${(info.size / 1024).toFixed(2)} KB`);
+                }
+            } catch (error) {
+                console.error('리플레이 정보 로드 실패:', error);
             }
         }
         
