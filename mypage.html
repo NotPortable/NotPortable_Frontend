@@ -581,53 +581,9 @@
             <div class="achievements">
                 <div class="stats-section-title">🏆 업적</div>
                 <div class="achievement-grid">
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">🎮</div>
-                        <div class="achievement-name">첫 플레이</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">🔥</div>
-                        <div class="achievement-name">10회 플레이</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">⭐</div>
-                        <div class="achievement-name">100회 플레이</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">🥇</div>
-                        <div class="achievement-name">1위 달성</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">💯</div>
-                        <div class="achievement-name">만점 기록</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">🪙</div>
-                        <div class="achievement-name">코인 1000개</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">⚡</div>
-                        <div class="achievement-name">스피드런</div>
-                    </div>
-                    <div class="achievement-badge unlocked">
-                        <div class="achievement-icon">🎯</div>
-                        <div class="achievement-name">정확도 왕</div>
-                    </div>
-                    <div class="achievement-badge">
-                        <div class="achievement-icon">🏅</div>
-                        <div class="achievement-name">모든 레벨</div>
-                    </div>
-                    <div class="achievement-badge">
-                        <div class="achievement-icon">👑</div>
-                        <div class="achievement-name">그랜드마스터</div>
-                    </div>
-                    <div class="achievement-badge">
-                        <div class="achievement-icon">🌟</div>
-                        <div class="achievement-name">완벽주의</div>
-                    </div>
-                    <div class="achievement-badge">
-                        <div class="achievement-icon">💎</div>
-                        <div class="achievement-name">레전드</div>
+                    <!-- 동적으로 생성됨 -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2vh; color: #666;">
+                        업적 로딩 중...
                     </div>
                 </div>
             </div>
@@ -639,12 +595,42 @@
 
         // 페이지 로드시 사용자 데이터 가져오기
         async function loadUserData() {
-            // 로그인 체크
-            const USERNAME = localStorage.getItem('notportable_username');
-            if (!USERNAME) {
+            // URL에서 사용자명 확인 (검색으로 온 경우)
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchedUser = urlParams.get('user');
+            
+            // 로그인한 사용자 확인
+            const loggedInUser = localStorage.getItem('notportable_username');
+            
+            // 표시할 사용자 결정
+            let USERNAME;
+            let isOwnPage = false;
+            
+            if (searchedUser) {
+                // 검색으로 온 경우 - 검색한 사용자의 페이지 표시
+                USERNAME = searchedUser;
+                isOwnPage = (loggedInUser === searchedUser);
+                console.log(`🔍 검색된 사용자: ${USERNAME}`);
+            } else if (loggedInUser) {
+                // 직접 접속한 경우 - 로그인한 사용자의 페이지 표시
+                USERNAME = loggedInUser;
+                isOwnPage = true;
+                console.log(`👤 내 페이지: ${USERNAME}`);
+            } else {
+                // 로그인 안 됨 & 검색도 안 함
                 alert('로그인이 필요합니다!');
                 window.location.href = 'login.html';
                 return;
+            }
+            
+            // 페이지 타이틀 변경
+            if (!isOwnPage) {
+                document.title = `NotPortable - ${USERNAME}의 페이지`;
+                // 헤더에 표시
+                const pageTitle = document.querySelector('.profile-username');
+                if (pageTitle) {
+                    pageTitle.innerHTML = `${USERNAME} <span style="font-size: 0.8em; color: #666;">(다른 사용자)</span>`;
+                }
             }
             
             // 프로필 이름 표시
@@ -654,6 +640,8 @@
             
             let availableGames = [];
             let totalPlays = 0;
+            let maxScore = 0;
+            let totalCoins = 0;
             
             // Neverball 데이터 확인
             try {
@@ -662,6 +650,8 @@
                     const data = await neverballResponse.json();
                     availableGames.push('neverball');
                     totalPlays += data.stats.total_plays;
+                    maxScore = Math.max(maxScore, data.stats.max_score);
+                    totalCoins += data.stats.total_plays * data.stats.avg_coins; // 총 코인 추정
                     updateNeverballUI(data);
                     console.log('✅ Neverball 데이터 로드 완료');
                 }
@@ -677,6 +667,7 @@
                     const data = await supertuxResponse.json();
                     availableGames.push('supertux');
                     totalPlays += data.stats.total_plays;
+                    totalCoins += data.stats.total_coins;
                     updateSuperTuxUI(data);
                     console.log('✅ SuperTux 데이터 로드 완료');
                 }
@@ -692,6 +683,7 @@
                     const data = await etrResponse.json();
                     availableGames.push('etr');
                     totalPlays += data.stats.total_plays;
+                    maxScore = Math.max(maxScore, data.stats.max_score);
                     updateETRUI(data);
                     console.log('✅ ETR 데이터 로드 완료');
                 }
@@ -704,16 +696,124 @@
             if (availableGames.length === 0) {
                 showNoDataMessage();
                 updateProfileStats(0, 0);
+                updateAchievements(0, 0, 0); // 업적도 빈 상태로
                 return;
             }
             
             // 프로필 통계 업데이트
             updateProfileStats(totalPlays, availableGames.length);
             
+            // 업적 동적 생성
+            updateAchievements(totalPlays, maxScore, totalCoins);
+            console.log(`🏆 업적 업데이트: 플레이 ${totalPlays}회, 최고점수 ${maxScore}, 코인 ${totalCoins}개`);
+            
             // 첫 번째 활성화된 게임 탭 표시
             switchGameStats(availableGames[0]);
             
             console.log(`📊 총 ${availableGames.length}개 게임 플레이 기록 발견`);
+        }
+        
+        // 업적 동적 생성
+        function updateAchievements(totalPlays, maxScore, totalCoins) {
+            const achievements = [
+                {
+                    id: 'first_play',
+                    name: '첫 플레이',
+                    icon: '🎮',
+                    condition: totalPlays >= 1,
+                    description: '첫 게임 플레이'
+                },
+                {
+                    id: 'play_10',
+                    name: '10회 플레이',
+                    icon: '🔥',
+                    condition: totalPlays >= 10,
+                    description: '10회 플레이 달성'
+                },
+                {
+                    id: 'play_50',
+                    name: '50회 플레이',
+                    icon: '⭐',
+                    condition: totalPlays >= 50,
+                    description: '50회 플레이 달성'
+                },
+                {
+                    id: 'play_100',
+                    name: '100회 플레이',
+                    icon: '💯',
+                    condition: totalPlays >= 100,
+                    description: '100회 플레이 달성'
+                },
+                {
+                    id: 'high_score',
+                    name: '고득점',
+                    icon: '🏆',
+                    condition: maxScore >= 8000,
+                    description: '8000점 이상 달성'
+                },
+                {
+                    id: 'coins_1000',
+                    name: '코인 1000개',
+                    icon: '🪙',
+                    condition: totalCoins >= 1000,
+                    description: '총 코인 1000개 획득'
+                },
+                {
+                    id: 'speed_run',
+                    name: '스피드런',
+                    icon: '⚡',
+                    condition: maxScore >= 9000,
+                    description: '9000점 이상 달성'
+                },
+                {
+                    id: 'accuracy',
+                    name: '정확도 왕',
+                    icon: '🎯',
+                    condition: totalPlays >= 30 && maxScore >= 7000,
+                    description: '30회 이상 + 7000점 이상'
+                },
+                {
+                    id: 'all_levels',
+                    name: '모든 레벨',
+                    icon: '🏅',
+                    condition: totalPlays >= 200,
+                    description: '200회 플레이 달성'
+                },
+                {
+                    id: 'grand_master',
+                    name: '그랜드마스터',
+                    icon: '👑',
+                    condition: totalPlays >= 500 && maxScore >= 10000,
+                    description: '500회 + 만점'
+                },
+                {
+                    id: 'perfectionist',
+                    name: '완벽주의',
+                    icon: '🌟',
+                    condition: maxScore >= 10000 && totalCoins >= 5000,
+                    description: '만점 + 코인 5000개'
+                },
+                {
+                    id: 'legend',
+                    name: '레전드',
+                    icon: '💎',
+                    condition: totalPlays >= 1000,
+                    description: '1000회 플레이 달성'
+                }
+            ];
+            
+            let achievementHTML = '';
+            achievements.forEach(ach => {
+                const unlocked = ach.condition ? 'unlocked' : '';
+                achievementHTML += `
+                    <div class="achievement-badge ${unlocked}" title="${ach.description}">
+                        <div class="achievement-icon">${ach.icon}</div>
+                        <div class="achievement-name">${ach.name}</div>
+                    </div>
+                `;
+            });
+            
+            document.querySelector('.achievement-grid').innerHTML = achievementHTML;
         }
         
         // 프로필 통계 업데이트

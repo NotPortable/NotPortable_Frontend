@@ -318,8 +318,8 @@
             right: 2vw;
             top: 50%;
             transform: translateY(-50%);
-            width: 4vw;
-            height: 4vw;
+            width: 2vw;
+            height: 2vw;
             cursor: pointer;
             transition: transform 0.2s;
         }
@@ -437,7 +437,7 @@
                             </div>
                         </div>
                         <div class="union-icon">
-                            <img alt="" src="./Union.png" />
+                            <img alt="" src="http://localhost:3845/assets/ae0e9ae60798a968dc89220d59547eb6051558f8.png" />
                         </div>
                         <!-- Dropdown Menu -->
                         <div class="dropdown-menu" id="dropdown-menu">
@@ -505,9 +505,9 @@
         function handleSearch() {
             const username = document.getElementById('username-input').value;
             if (username.trim()) {
-                alert(`게임: ${selectedGame}\n사용자: ${username}`);
+                console.log(`🔍 ${username} 마이페이지로 이동`);
                 // 다음 페이지로 이동
-                window.location.href = `ranking.html?game=${selectedGame}&user=${encodeURIComponent(username)}`;
+                window.location.href = `mypage.html?user=${encodeURIComponent(username)}`;
             } else {
                 alert('사용자 이름을 입력해주세요!');
             }
